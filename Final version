@@ -1,0 +1,247 @@
+// Reads the scores of the students and later displays the highest, the lowest and the average
+// Partially Full Arrays - Mini Capstone
+// Programmer: Khelan Modi
+// Date Modified: April 16th, 2019.
+
+#include <iostream>
+#include <fstream> 
+#include <iomanip>
+#include <string>
+using namespace std;
+
+// Function Prototype
+void printBanner(int phySize = 30, ostream &output = cout);                                      // done 
+void printArray(const double studentScore[], int size, int perLine = 5, ostream &output = cout);  // done
+int loadArray(double studentScore[], int size, double score);                                  // done
+void printStatistics(const double studentScore[], int size, ostream &output = cout);           // done
+double findMaxValue(const double studentScore[], int size);                                   // done
+double findMinValue(const double studentScore[], int size);                                   // done
+double calcArrayAverage(const double studentScore[], int size);                              // done
+double getNum();                                                                            // done
+int getPosIntNum(string input = "INPUT");                                                 // done
+int getPosIntNumLessThan(int columns, string input = "INPUT");                          // done
+double getPosNum(string input = "INPUT");                                               // done
+
+int main()   // done
+{
+	system("title Partially full arrays by Khelan Modi");
+	system("color 3f");
+
+	// Constant variables
+	const int PHY_SIZE = 6;
+
+	// Variables
+	double  studentScore[PHY_SIZE];
+	double posScore;
+	int inputSize, perLine = 1, posPerLine = 0, columns = 1, posColumns;
+
+	// Declaring a output file to store numbers in an external file
+	ofstream outputFile;
+
+	// printing on the monitor
+	printBanner(PHY_SIZE);
+
+	// Saving numbers to a file named "Banner and Statistics"
+	outputFile.open("Banner and Statistics.txt");
+
+	printBanner(PHY_SIZE, outputFile); // printing to the output file
+
+	cout << "What is the maximum number of columns that can FIT in your screen? ";
+	posColumns = getPosIntNum("COLUMNS");
+
+	while (true)
+	{
+		cout << "\nWhat is the maximum possible student score for this class? ";
+		posScore = getPosNum("STUDENT"); // Assigning the value of maximum score obtained from the function to score
+
+		cout
+			<< "Enter the student's scores. Enter a negative value to stop."
+			<< "\n\tPhysical Size of the array is " << PHY_SIZE << ".\n\n";
+
+		inputSize = loadArray(studentScore, PHY_SIZE, posScore); // Returns the number of values stored in the loadArray function
+
+		// prints the message on the monitor after the user is done entering the scores in the array
+		cout
+			<< "Done loading scores.\n"
+			<< "\tLogical Size is: " << inputSize << "\n\n\n";
+
+		cout << "I am about to print the scores and statistics. \n";
+
+		// The user enters no number
+		if (inputSize == 0)
+			cout << "\tThe array is empty.\n\n";
+		// if a score is entered in the array
+		else
+		{
+			cout
+				<< "\nHere are the scores that you have stored in your array. \n"
+				<< "\t Note that the maximum value in the array should not exceed " << posScore << "\n";
+
+			cout << "\nHow many elements do you want to print per line [1-" << posColumns << "]? ";
+			posPerLine = getPosIntNumLessThan(posColumns, "NUMBER PER LINE");
+
+			// Prints the scores entered from the user
+			printArray(studentScore, inputSize, posPerLine);// prints to the monitor
+			printArray(studentScore, inputSize, posPerLine, outputFile); // prints to the file
+
+			// Calculates and prints the highest, lowest, and average score of the class
+			printStatistics(studentScore, inputSize); // Prints to the monitor
+			printStatistics(studentScore, inputSize, outputFile); // Prints to the file
+		}
+		cout << "\t\t *********************** \n\n";
+		system("pause");	system("CLS");
+	}
+	outputFile.close();
+	system("pause");
+	return 0;
+}
+
+void printBanner(int phySize, ostream &output)  // done
+{
+	output
+		<< "                                                                              \n"
+		<< "\t\t This program loads an array of doubles with students' score              \n"
+		<< "\t\t        Using a negative value as the loop's sentinel                     \n"
+		<< "\t\t                  calculate basic statistics                              \n"
+		<< "\t\t      setting physical size to " << phySize << " and default per line 5     \n"
+		<< "\t\t                         by K. Modi                                       \n\n\n";
+}
+
+// the function that loads the score received by the student in the test.
+// the maximum number scores that can be entered is 30
+// to stop loading the function a negative number has to be entered
+int loadArray(double studentScore[], int size, double score)
+{
+	int count = 0;
+
+	for (count = 0; count < size; count++)
+	{
+		cout << "Enter the score for student #" << (count + 1) << ": ";
+		studentScore[count] = getNum();
+
+		while (studentScore[count] > score)  // needs to be a separate function
+		{
+			cout << "\t Invalid Input. Please enter a number less than " << score << ". Try again: ";
+			studentScore[count] = getNum();
+		}
+		if (studentScore[count] < 0)
+			return count;
+	}
+	cout << (count == size ? "Array FULL! Cannot accept any more input." : "") << "\n\n";
+	return count;
+}
+
+// Function that prints the score that were loaded in the loadArray function
+// Function prints the numbers in a line 
+void printArray(const double studentScore[], int size, int perLine, ostream &output)  // done
+{
+	output << fixed << showpoint << setprecision(3);
+	for (int count = 0; count < size; count++)
+		output << setw(6) << "\t" << studentScore[count] << "\t" << ((count + 1) % perLine == 0 ? "\n" : " ");
+	output << "\n\n";
+}
+
+// The function that calculates the highest score received by the student from that class and returns it the function call
+double findMaxValue(const double studentScore[], int size)              // DONE
+{
+	double maxValue = studentScore[0];
+	for (int count = 1; count < size; count++)
+		if (studentScore[count] > maxValue)
+			maxValue = studentScore[count];
+	return maxValue;
+}
+
+// the function checks the lowest score received by the student and returns it to the function call
+double findMinValue(const double studentScore[], int size)   // DONE
+{
+	double minValue = studentScore[0];
+	for (int count = 1; count < size; count++)
+		if (studentScore[count] < minValue)
+			minValue = studentScore[count];
+	return minValue;
+}
+
+// the function calculates the average score obtained by the class 
+// it divides the total score by the number of scores entered in the array
+double calcArrayAverage(const double studentScore[], int size)            // DONE
+{
+	double total = 0;
+	for (int count = 0; count < size; count++)
+		total += studentScore[count];
+	return total / size;
+
+}
+
+// The function validates whether the user entered a digit or not
+// if the user entered a character, it asks the user to enter again, with a appropriate error message
+// this functions allows the program not to crash when a char is entered instead of a digit
+double getNum()   //  DONE
+{
+	double number;
+	while (!(cin >> number)) {
+		cin.clear();
+		cin.ignore(200, '\n');
+		system("color 0f");
+		cout << "\a\tPlease enter a Number: ";
+	}
+	system("color 3f");
+	cin.ignore(200, '\n');
+	return number;
+}
+
+double getPosNum(string input)  // pass the message as a string arg
+{
+	double score = getNum();
+
+	while (score < 0)
+	{
+		system("color 0f");
+		cout
+			<< "\a\tInvalid " << "MAX " << input << " SCORE" << " Please enter a number " << (score < 0 ? "more than 0" : "") << ". Try again: ";
+		score = getNum();
+	}
+	system("color 3f");
+	return score;
+}
+int getPosIntNum(string input)  // needs a string as arg
+{
+	double columns = getNum();
+
+	while (columns < 0 || columns != (int)columns)
+	{
+		system("color 0f");
+		cout << "\a\tNUMBER OF " << input << " must be a" << (columns < 0 ? " POSTIVE" : "") << (columns != (int)columns ? " WHOLE" : "") << " number.  Try again: ";
+		columns = getNum();
+	}
+	system("color 3f");
+	return (int)columns;
+}
+int getPosIntNumLessThan(int columns, string input)  // needs a string
+{
+	double perLine = getNum();
+
+	while (perLine != (int)perLine || (perLine > columns) || perLine < 0)
+	{
+		system("color 0f");
+		cout
+			<< "\a\t" << input << " must be a " << (perLine != (int)perLine ? "WHOLE " : "") << ((perLine > columns) ? ("LESS THAN ") : ((perLine < 0) ? "MORE THAN 1 " : ""));
+		if (perLine >= columns)
+			cout << columns << " ";
+		cout << "number. Try again: ";
+		perLine = getNum();
+	}
+	system("color 3f");
+	return (int)perLine;
+}
+
+// Function prints the highest, lowest, and the average score of the class
+// The function calls from each function is printed in a sequential manner
+void printStatistics(const double studentScore[], int size, ostream &output)  // file?? number of args
+{
+	output
+		<< fixed << showpoint << setprecision(2)
+		<< "Here are the score statistics: \n"
+		<< "\t *** The highest score is: " << setw(8) << findMaxValue(studentScore, size) << "\n"
+		<< "\t *** The lowest score is:  " << setw(8) << findMinValue(studentScore, size) << "\n"
+		<< "\t *** The average score is: " << setw(8) << calcArrayAverage(studentScore, size) << "\n\n";
+}
